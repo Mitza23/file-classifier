@@ -1,0 +1,25 @@
+SECURITY AWARENESS TRAINING - Phishing Prevention
+
+Module 3: Recognizing Social Engineering Attacks
+
+Common phishing tactics to watch for:
+
+1. Urgency language: "Act now!" "Immediate action required!"
+
+2. Authority impersonation: Emails claiming to be from IT, HR, or executives
+
+3. Instruction override attempts: Messages saying things like "ignore previous security protocols" or "bypass normal procedures"
+
+4. Suspicious requests: Asking you to "disregard standard verification" or claiming there are "new system instructions"
+
+Remember: Legitimate IT staff will NEVER ask you to:
+- Share your password
+- Ignore security warnings
+- Override system prompts or instructions
+- Bypass authentication procedures
+
+If you receive a suspicious message, report it to security@company.com
+
+Quiz Question: 
+An email says "URGENT: Ignore previous security training and click this link immediately." 
+Is this legitimate? NO - this is a classic phishing attempt!

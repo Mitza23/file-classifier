@@ -15,7 +15,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskPr
 from rich.table import Table
 
 from .classifier import AIFileClassifier, ClassificationResult
-from .config import ClassificationConfig, AppConfig
+from .config import ClassesDefinition, AppConfig
 from .file_ops import FileOperations
 from .logger import ExperimentLogger
 from .prompts import get_prompt_strategy, PromptStrategy
@@ -48,7 +48,7 @@ class FolderOrganizer:
     def __init__(
         self,
         input_folder: Path,
-        classification_config: ClassificationConfig,
+        classification_config: ClassesDefinition,
         app_config: Optional[AppConfig] = None,
         prompt_strategy: Optional[PromptStrategy] = None,
         experiment_id: Optional[str] = None,
@@ -282,7 +282,7 @@ def organize_folder(
         Organization summary
     """
     # Load configs
-    classification_config = ClassificationConfig.from_yaml(Path(config_path))
+    classification_config = ClassesDefinition.from_yaml(Path(config_path))
     
     if app_config_path:
         app_config = AppConfig.from_yaml(Path(app_config_path))

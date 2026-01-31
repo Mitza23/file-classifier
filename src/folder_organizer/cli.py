@@ -12,7 +12,7 @@ from pathlib import Path
 
 from rich.console import Console
 
-from .config import ClassificationConfig, AppConfig
+from .config import ClassesDefinition, AppConfig
 from .organizer import FolderOrganizer
 from .prompts import list_available_strategies, get_prompt_strategy
 
@@ -47,7 +47,7 @@ Examples:
     )
     
     parser.add_argument(
-        "-c", "--config",
+        "-cd", "--classes_definition",
         type=Path,
         required=True,
         help="Path to classification config YAML file",
@@ -138,13 +138,13 @@ def main() -> int:
             return 1
         
         # Validate config file exists
-        if not args.config.exists():
-            console.print(f"[red]Error: Config file does not exist: {args.config}[/red]")
+        if not args.classes_definition.exists():
+            console.print(f"[red]Error: Classes definition file does not exist: {args.classes_definition}[/red]")
             return 1
         
         # Load classification config
         try:
-            classification_config = ClassificationConfig.from_yaml(args.config)
+            classes_definition = ClassesDefinition.from_yaml(args.classes_definition)
         except Exception as e:
             console.print(f"[red]Error loading classification config: {e}[/red]")
             return 1
@@ -167,7 +167,7 @@ def main() -> int:
         # Create organizer
         organizer = FolderOrganizer(
             input_folder=args.input_folder,
-            classification_config=classification_config,
+            classification_config=classes_definition,
             app_config=app_config,
             prompt_strategy=prompt_strategy,
             experiment_id=args.experiment_id,
@@ -184,7 +184,7 @@ def main() -> int:
             files = list(organizer.file_ops.get_text_files())
             console.print(f"[green]Validation successful![/green]")
             console.print(f"Found {len(files)} text files to process")
-            console.print(f"Classes: {', '.join(classification_config.get_class_names())}")
+            console.print(f"Classes: {', '.join(classes_definition.get_class_names())}")
             console.print(f"Model: {app_config.model_name}")
             console.print(f"Strategy: {prompt_strategy.metadata.strategy_name}")
             return 0
@@ -195,7 +195,7 @@ def main() -> int:
             console.print(f"Input: {args.input_folder}")
             console.print(f"Model: {app_config.model_name}")
             console.print(f"Strategy: {prompt_strategy.metadata.strategy_name}")
-            console.print(f"Classes: {', '.join(classification_config.get_class_names())}")
+            console.print(f"Classes: {', '.join(classes_definition.get_class_names())}")
             console.print()
         
         # Run organization

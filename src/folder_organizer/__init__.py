@@ -7,7 +7,7 @@ This package provides tools for:
 - Logging experiment data for research analysis
 """
 
-from .config import ClassificationConfig, AppConfig, ClassDefinition
+from .config import ClassesDefinition, AppConfig, ClassDefinition
 from .classifier import AIFileClassifier, ClassificationResult
 from .file_ops import FileOperations, SanitizedPath
 from .logger import ExperimentLogger
@@ -26,7 +26,7 @@ __author__ = "Folder Organizer Team"
 
 __all__ = [
     # Configuration
-    "ClassificationConfig",
+    "ClassesDefinition",
     "AppConfig",
     "ClassDefinition",
     # Classifier

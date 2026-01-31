@@ -15,7 +15,7 @@ from langchain_ollama import ChatOllama
 from langchain_core.messages import BaseMessage
 from pydantic import ValidationError
 
-from .config import ClassificationConfig, AppConfig, create_classification_response_model
+from .config import ClassesDefinition, AppConfig, create_classification_response_model
 from .prompts import PromptStrategy, get_prompt_strategy
 
 
@@ -97,7 +97,7 @@ class TokenTruncator:
 class LLMResponseParser:
     """Parses and validates LLM responses."""
     
-    def __init__(self, config: ClassificationConfig):
+    def __init__(self, config: ClassesDefinition):
         self.config = config
         self.response_model = create_classification_response_model(config)
         self.valid_classes = set(config.get_class_names())
@@ -203,7 +203,7 @@ class AIFileClassifier:
     
     def __init__(
         self,
-        classification_config: ClassificationConfig,
+        classification_config: ClassesDefinition,
         app_config: AppConfig,
         prompt_strategy: Optional[PromptStrategy] = None,
     ):

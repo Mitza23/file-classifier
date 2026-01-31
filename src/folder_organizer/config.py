@@ -36,13 +36,13 @@ class ClassDefinition(BaseModel):
         return sanitized
 
 
-class ClassificationConfig(BaseModel):
+class ClassesDefinition(BaseModel):
     """Configuration containing all class definitions."""
     
     classes: list[ClassDefinition] = Field(..., min_length=1)
     
     @classmethod
-    def from_yaml(cls, path: Path) -> "ClassificationConfig":
+    def from_yaml(cls, path: Path) -> "ClassesDefinition":
         """Load configuration from a YAML file."""
         with open(path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
@@ -82,7 +82,7 @@ class AppConfig(BaseModel):
     """Application-level configuration."""
     
     # LLM settings
-    model_name: str = Field(default="llama3", description="Ollama model name")
+    model_name: str = Field(default="llama3.1:8b", description="Ollama model name")
     max_tokens: int = Field(default=4096, description="Maximum context window tokens")
     temperature: float = Field(default=0.1, description="LLM temperature for classification")
     
@@ -107,7 +107,7 @@ class AppConfig(BaseModel):
         return cls(**data) if data else cls()
 
 
-def create_classification_response_model(config: ClassificationConfig) -> type[BaseModel]:
+def create_classification_response_model(config: ClassesDefinition) -> type[BaseModel]:
     """
     Create a dynamic Pydantic model for structured LLM output.
     

@@ -1,0 +1,33 @@
+CONSULTING SERVICES AGREEMENT
+
+This Agreement ("Agreement") is entered into as of January 15, 2024, by and between:
+
+ABC Corporation, a Delaware corporation ("Client")
+AND
+XYZ Consulting LLC, a California limited liability company ("Consultant")
+
+1. SERVICES
+Consultant agrees to provide strategic business consulting services including market analysis, competitive research, and growth strategy recommendations.
+
+2. TERM
+This Agreement shall commence on February 1, 2024 and continue for twelve (12) months unless terminated earlier in accordance with Section 7.
+
+3. COMPENSATION
+Client shall pay Consultant a monthly retainer of $15,000, due on the first business day of each month. Additional project work shall be billed at $250 per hour.
+
+4. CONFIDENTIALITY
+Both parties agree to maintain strict confidentiality of all proprietary information exchanged during the course of this engagement. This obligation survives termination.
+
+5. INTELLECTUAL PROPERTY
+All deliverables created under this Agreement shall be the sole property of Client upon full payment.
+
+6. LIMITATION OF LIABILITY
+In no event shall either party be liable for indirect, incidental, or consequential damages.
+
+7. TERMINATION
+Either party may terminate with 30 days written notice. Client shall pay for all services rendered through termination date.
+
+IN WITNESS WHEREOF, the parties have executed this Agreement.
+
+_________________________    _________________________
+ABC Corporation              XYZ Consulting LLC

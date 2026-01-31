@@ -4,7 +4,7 @@
 # Adjust these based on your local setup and research needs.
 
 # LLM Settings
-model_name: "llama3"              # Ollama model name (e.g., llama3, mistral, mixtral)
+model_name: "llama3.1:8b"              # Ollama model name (e.g., llama3, mistral, mixtral)
 max_tokens: 4096                  # Maximum context window tokens
 temperature: 0.1                  # Low temperature for consistent classification
 
