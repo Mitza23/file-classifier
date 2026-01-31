@@ -3,7 +3,7 @@
 Command-line interface for the Folder Organizer.
 
 Usage:
-    folder-organizer <input_folder> --config <config.yaml> [options]
+    folder-organizer <input_folder> --classes_definition <classes.yaml> [options]
 """
 
 import argparse
@@ -26,16 +26,16 @@ def create_parser() -> argparse.ArgumentParser:
         epilog="""
 Examples:
   # Basic usage
-  folder-organizer ./documents --config classes.yaml
+  folder-organizer ./documents --classes_definition classes.yaml
   
   # Use chain-of-thought prompting
-  folder-organizer ./documents --config classes.yaml --strategy cot
+  folder-organizer ./documents --classes_definition classes.yaml --strategy cot
   
   # Specify model and concurrency
-  folder-organizer ./documents --config classes.yaml --model mistral --concurrency 5
+  folder-organizer ./documents --classes_definition classes.yaml --model mistral --concurrency 5
   
   # Custom experiment ID
-  folder-organizer ./documents --config classes.yaml --experiment-id test_run_001
+  folder-organizer ./documents --classes_definition classes.yaml --experiment-id test_run_001
         """,
     )
     
@@ -50,7 +50,7 @@ Examples:
         "-cd", "--classes_definition",
         type=Path,
         required=True,
-        help="Path to classification config YAML file",
+        help="Path to classes definition YAML file",
     )
     
     # Optional arguments
