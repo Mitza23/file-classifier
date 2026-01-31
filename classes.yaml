@@ -1,0 +1,48 @@
+# Example Classification Configuration
+# 
+# This file defines the categories for document classification.
+# Each class has a name and description that helps the LLM understand
+# what type of documents belong in each category.
+
+classes:
+  - name: Financial
+    description: >
+      Financial documents including invoices, receipts, bank statements,
+      tax documents, budgets, expense reports, and any documents related
+      to money, transactions, or financial planning.
+
+  - name: Legal
+    description: >
+      Legal documents including contracts, agreements, terms of service,
+      privacy policies, NDAs, legal notices, court documents, and any
+      documents with legal implications or formal legal language.
+
+  - name: Technical
+    description: >
+      Technical documentation including software documentation, API references,
+      code comments, system specifications, architecture documents, README files,
+      and any documents related to technology or software development.
+
+  - name: Marketing
+    description: >
+      Marketing materials including advertisements, promotional content,
+      press releases, social media posts, brand guidelines, campaign briefs,
+      and any documents aimed at promoting products or services.
+
+  - name: HR
+    description: >
+      Human resources documents including resumes, job descriptions,
+      employee handbooks, performance reviews, onboarding materials,
+      company policies, and any documents related to personnel management.
+
+  - name: Research
+    description: >
+      Research documents including academic papers, research proposals,
+      literature reviews, experiment reports, data analysis documents,
+      and any documents related to scientific or academic research.
+
+  - name: Personal
+    description: >
+      Personal documents including personal letters, journals, notes,
+      personal correspondence, non-business communications, and any
+      documents of a personal nature not fitting other categories.

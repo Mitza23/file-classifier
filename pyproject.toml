@@ -1,0 +1,32 @@
+[project]
+name = "folder-organizer"
+version = "1.0.0"
+description = "AI-powered document classifier for prompt injection research"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0.0",
+    "pyyaml>=6.0",
+    "langchain>=0.1.0",
+    "langchain-community>=0.0.10",
+    "langchain-ollama>=0.0.1",
+    "tiktoken>=0.5.0",
+    "aiofiles>=23.0.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[project.scripts]
+folder-organizer = "folder_organizer.cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
