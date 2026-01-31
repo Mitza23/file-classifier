@@ -201,13 +201,9 @@ class AIFileClassifier:
     - Modular prompt strategies
     """
     
-    def __init__(
-        self,
-        classification_config: ClassesDefinition,
-        app_config: AppConfig,
-        prompt_strategy: Optional[PromptStrategy] = None,
-    ):
-        self.classification_config = classification_config
+    def __init__(self, classes_definition: ClassesDefinition, app_config: AppConfig,
+                 prompt_strategy: Optional[PromptStrategy] = None):
+        self.classes_definition = classes_definition
         self.app_config = app_config
         
         # Initialize prompt strategy
@@ -218,7 +214,7 @@ class AIFileClassifier:
             max_tokens=app_config.max_tokens,
             reserve_tokens=1500  # Reserve space for system prompt and response
         )
-        self.parser = LLMResponseParser(classification_config)
+        self.parser = LLMResponseParser(classes_definition)
         
         # Concurrency control
         self._semaphore: Optional[asyncio.Semaphore] = None
@@ -231,7 +227,7 @@ class AIFileClassifier:
         )
         
         # Create the prompt
-        class_definitions = classification_config.format_for_prompt()
+        class_definitions = classes_definition.format_for_prompt()
         self.prompt = self.prompt_strategy.create_prompt(class_definitions)
     
     @property
@@ -263,7 +259,7 @@ class AIFileClassifier:
         
         # Format the prompt
         formatted_messages = self.prompt.format_messages(
-            class_definitions=self.classification_config.format_for_prompt(),
+            class_definitions=self.classes_definition.format_for_prompt(),
             file_content=truncated_content
         )
         

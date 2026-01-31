@@ -7,20 +7,20 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from folder_organizer.config import (
+from src.folder_organizer.config import (
     ClassDefinition,
-    ClassificationConfig,
+    ClassesDefinition,
     AppConfig,
     create_classification_response_model,
 )
-from folder_organizer.file_ops import FileOperations, SanitizedPath
-from folder_organizer.prompts import (
+from src.folder_organizer.file_ops import FileOperations, SanitizedPath
+from src.folder_organizer.prompts import (
     get_prompt_strategy,
     list_available_strategies,
     DirectPromptStrategy,
     ChainOfThoughtPromptStrategy,
 )
-from folder_organizer.classifier import TokenTruncator, LLMResponseParser
+from src.folder_organizer.classifier import TokenTruncator, LLMResponseParser
 
 
 class TestSanitizedPath:

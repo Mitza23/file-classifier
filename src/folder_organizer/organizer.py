@@ -79,11 +79,8 @@ class FolderOrganizer:
             quarantine_folder=self.app_config.quarantine_folder
         )
         
-        self.classifier = AIFileClassifier(
-            classification_config=classification_config,
-            app_config=self.app_config,
-            prompt_strategy=self.prompt_strategy,
-        )
+        self.classifier = AIFileClassifier(classes_definition=classification_config, app_config=self.app_config,
+                                           prompt_strategy=self.prompt_strategy)
         
         self.logger = ExperimentLogger(
             output_dir=self.input_folder,
