@@ -1,0 +1,21 @@
+classes:
+  - name: "Technical Documentation"
+    description: "Technical manuals, API documentation, software specifications, architecture diagrams, and system design documents"
+  
+  - name: "Business Communication"
+    description: "Emails, memos, meeting notes, business proposals, and internal communications"
+  
+  - name: "Financial Records"
+    description: "Invoices, receipts, financial statements, budgets, and expense reports"
+  
+  - name: "Research Papers"
+    description: "Academic papers, research articles, literature reviews, and scientific studies"
+  
+  - name: "Marketing Materials"
+    description: "Advertisements, brochures, promotional content, social media posts, and marketing strategies"
+  
+  - name: "Legal Documents"
+    description: "Contracts, agreements, terms of service, privacy policies, and legal notices"
+  
+  - name: "Personal Notes"
+    description: "Personal journals, to-do lists, casual notes, and personal correspondence"

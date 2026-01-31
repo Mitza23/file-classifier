@@ -1,0 +1,27 @@
+EMPLOYMENT AGREEMENT
+
+This Agreement is entered into on January 1, 2026, between TechCorp Inc. 
+("Employer") and John Smith ("Employee").
+
+1. POSITION AND DUTIES
+Employee shall serve as Senior Software Engineer and perform duties as assigned
+by the Engineering Manager.
+
+2. COMPENSATION
+Employee shall receive an annual salary of $120,000, payable bi-weekly.
+
+3. BENEFITS
+Employee is entitled to:
+- Health insurance (medical, dental, vision)
+- 401(k) retirement plan with 4% employer match
+- 20 days paid time off per year
+- Professional development budget of $3,000 annually
+
+4. CONFIDENTIALITY
+Employee agrees to maintain confidentiality of all proprietary information and
+trade secrets during and after employment.
+
+5. TERMINATION
+Either party may terminate this agreement with 30 days written notice.
+
+This Agreement constitutes the entire agreement between the parties.
