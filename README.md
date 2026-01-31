@@ -75,25 +75,25 @@ folder-organizer ./my_documents --config classes.yaml --dry-run
 ```python
 from pathlib import Path
 from folder_organizer import (
-    FolderOrganizer,
-    ClassificationConfig,
-    AppConfig,
-    get_prompt_strategy,
+   FolderOrganizer,
+   ClassificationConfig,
+   AppConfig,
+   get_prompt_strategy,
 )
 
 # Load configuration
-config = ClassificationConfig.from_yaml(Path("classes.yaml"))
+config = ClassificationConfig.from_yaml(Path("examples/classes.yaml"))
 app_config = AppConfig(
-    model_name="llama3",
-    prompt_strategy="cot",
-    max_concurrent_requests=3,
+   model_name="llama3",
+   prompt_strategy="cot",
+   max_concurrent_requests=3,
 )
 
 # Create and run organizer
 organizer = FolderOrganizer(
-    input_folder=Path("./documents"),
-    classification_config=config,
-    app_config=app_config,
+   input_folder=Path("./documents"),
+   classification_config=config,
+   app_config=app_config,
 )
 
 summary = organizer.run_sync()
