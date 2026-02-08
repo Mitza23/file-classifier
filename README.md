@@ -34,9 +34,6 @@ cd folder-organizer
 
 # Install in development mode
 pip install -e .
-
-# Or install dependencies directly
-pip install pydantic pyyaml langchain langchain-ollama rich aiofiles
 ```
 
 ## Quick Start

@@ -264,7 +264,7 @@ class AIFileClassifier:
         )
         
         try:
-            # Call the LLM
+            # Call the LLM4.5.0
             response = await self.llm.ainvoke(formatted_messages)
             raw_response = response.content if hasattr(response, 'content') else str(response)
             
