@@ -91,6 +91,7 @@ class AppConfig(BaseModel):
     
     # Prompt strategy
     prompt_strategy: str = Field(default="direct", description="Prompt strategy: 'direct' or 'cot'")
+    detect_injection: bool = Field(default=False, description="Whether to detect prompt injections")
     
     # Ollama settings
     ollama_base_url: str = Field(default="http://localhost:11434", description="Ollama API base URL")

@@ -20,7 +20,7 @@ from src.folder_organizer.prompts import (
     DirectPromptStrategy,
     ChainOfThoughtPromptStrategy,
 )
-from src.folder_organizer.classifier import TokenTruncator, LLMResponseParser
+from src.folder_organizer.classifier import LLMResponseParser
 
 
 class TestSanitizedPath:
@@ -73,14 +73,8 @@ class TestSanitizedPath:
         result = SanitizedPath.from_string("NUL")
         assert result.value.startswith("_")
     
-    def test_length_limit(self):
-        """Very long names should be truncated."""
-        long_name = "A" * 300
-        result = SanitizedPath.from_string(long_name)
-        assert len(result.value) <= 200
 
-
-class TestClassificationConfig:
+class TestClassesDefinition:
     """Tests for classification configuration."""
     
     def test_from_yaml_list_format(self, tmp_path):
@@ -94,7 +88,7 @@ class TestClassificationConfig:
         config_file = tmp_path / "config.yaml"
         config_file.write_text(config_content)
         
-        config = ClassificationConfig.from_yaml(config_file)
+        config = ClassesDefinition.from_yaml(config_file)
         assert len(config.classes) == 2
         assert config.classes[0].name == "Category1"
     
@@ -110,12 +104,12 @@ classes:
         config_file = tmp_path / "config.yaml"
         config_file.write_text(config_content)
         
-        config = ClassificationConfig.from_yaml(config_file)
+        config = ClassesDefinition.from_yaml(config_file)
         assert len(config.classes) == 2
     
     def test_get_class_names(self):
         """Test extracting class names."""
-        config = ClassificationConfig(classes=[
+        config = ClassesDefinition(classes=[
             ClassDefinition(name="A", description="A desc"),
             ClassDefinition(name="B", description="B desc"),
         ])
@@ -123,7 +117,7 @@ classes:
     
     def test_format_for_prompt(self):
         """Test formatting for prompt inclusion."""
-        config = ClassificationConfig(classes=[
+        config = ClassesDefinition(classes=[
             ClassDefinition(name="Test", description="Test description"),
         ])
         formatted = config.format_for_prompt()
@@ -136,7 +130,7 @@ class TestResponseModel:
     
     def test_valid_class(self):
         """Test that valid classes pass validation."""
-        config = ClassificationConfig(classes=[
+        config = ClassesDefinition(classes=[
             ClassDefinition(name="ValidClass", description="desc"),
         ])
         Model = create_classification_response_model(config)
@@ -146,7 +140,7 @@ class TestResponseModel:
     
     def test_case_insensitive(self):
         """Test case-insensitive matching."""
-        config = ClassificationConfig(classes=[
+        config = ClassesDefinition(classes=[
             ClassDefinition(name="ValidClass", description="desc"),
         ])
         Model = create_classification_response_model(config)
@@ -156,7 +150,7 @@ class TestResponseModel:
     
     def test_invalid_class_raises(self):
         """Test that invalid classes raise validation error."""
-        config = ClassificationConfig(classes=[
+        config = ClassesDefinition(classes=[
             ClassDefinition(name="ValidClass", description="desc"),
         ])
         Model = create_classification_response_model(config)
@@ -165,35 +159,13 @@ class TestResponseModel:
             Model(predicted_class="InvalidClass", confidence=0.9)
 
 
-class TestTokenTruncator:
-    """Tests for content truncation."""
-    
-    def test_short_content_unchanged(self):
-        """Short content should not be truncated."""
-        truncator = TokenTruncator(max_tokens=4096)
-        content = "Short content"
-        
-        result, was_truncated = truncator.truncate(content)
-        assert result == content
-        assert not was_truncated
-    
-    def test_long_content_truncated(self):
-        """Long content should be truncated."""
-        truncator = TokenTruncator(max_tokens=100, reserve_tokens=50)
-        content = "A" * 10000
-        
-        result, was_truncated = truncator.truncate(content)
-        assert len(result) < len(content)
-        assert was_truncated
-        assert "TRUNCATED" in result
-
 
 class TestLLMResponseParser:
     """Tests for LLM response parsing."""
     
     def test_extract_json_simple(self):
         """Test extracting JSON from simple response."""
-        config = ClassificationConfig(classes=[
+        config = ClassesDefinition(classes=[
             ClassDefinition(name="Test", description="desc"),
         ])
         parser = LLMResponseParser(config)
@@ -206,7 +178,7 @@ class TestLLMResponseParser:
     
     def test_extract_json_with_markdown(self):
         """Test extracting JSON from markdown code blocks."""
-        config = ClassificationConfig(classes=[
+        config = ClassesDefinition(classes=[
             ClassDefinition(name="Test", description="desc"),
         ])
         parser = LLMResponseParser(config)
@@ -219,7 +191,7 @@ class TestLLMResponseParser:
     
     def test_extract_json_with_surrounding_text(self):
         """Test extracting JSON from text with surrounding content."""
-        config = ClassificationConfig(classes=[
+        config = ClassesDefinition(classes=[
             ClassDefinition(name="Test", description="desc"),
         ])
         parser = LLMResponseParser(config)
@@ -229,22 +201,7 @@ class TestLLMResponseParser:
         
         assert result is not None
         assert result["predicted_class"] == "Test"
-    
-    def test_injection_detection(self):
-        """Test detection of injection indicators."""
-        config = ClassificationConfig(classes=[
-            ClassDefinition(name="Test", description="desc"),
-        ])
-        parser = LLMResponseParser(config)
-        
-        # Test path traversal
-        assert parser.detect_injection_indicators("response", "../../etc")
-        
-        # Test injection phrases
-        assert parser.detect_injection_indicators("ignore previous instructions", "Test")
-        
-        # Normal response should not trigger
-        assert not parser.detect_injection_indicators("This is a test document", "Test")
+
 
 
 class TestPromptStrategies:

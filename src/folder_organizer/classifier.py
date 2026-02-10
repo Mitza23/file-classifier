@@ -31,7 +31,6 @@ class ClassificationResult:
     prompt_template_used: str
     is_error: bool = False
     error_message: str = ""
-    injection_detected: bool = False
     
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for logging."""
@@ -44,54 +43,7 @@ class ClassificationResult:
             "prompt_template_used": self.prompt_template_used,
             "is_error": self.is_error,
             "error_message": self.error_message,
-            "injection_detected": self.injection_detected,
         }
-
-
-class TokenTruncator:
-    """Handles content truncation to fit within model context windows."""
-    
-    def __init__(self, max_tokens: int = 4096, reserve_tokens: int = 1000):
-        """
-        Initialize truncator.
-        
-        Args:
-            max_tokens: Maximum context window size
-            reserve_tokens: Tokens to reserve for system prompt and output
-        """
-        self.max_tokens = max_tokens
-        self.reserve_tokens = reserve_tokens
-        self.available_tokens = max_tokens - reserve_tokens
-    
-    def estimate_tokens(self, text: str) -> int:
-        """
-        Estimate token count for text.
-        
-        Uses a simple heuristic: ~4 characters per token for English text.
-        For more accuracy, consider using tiktoken with the specific model's tokenizer.
-        """
-        return len(text) // 4
-    
-    def truncate(self, content: str) -> tuple[str, bool]:
-        """
-        Truncate content to fit within available tokens.
-        
-        Returns:
-            Tuple of (truncated_content, was_truncated)
-        """
-        estimated_tokens = self.estimate_tokens(content)
-        
-        if estimated_tokens <= self.available_tokens:
-            return content, False
-        
-        # Calculate approximate character limit
-        char_limit = self.available_tokens * 4
-        
-        # Truncate with marker
-        truncated = content[:char_limit]
-        truncated += "\n\n[... CONTENT TRUNCATED DUE TO LENGTH ...]"
-        
-        return truncated, True
 
 
 class LLMResponseParser:
@@ -154,40 +106,7 @@ class LLMResponseParser:
             return validated, None
         except ValidationError as e:
             return None, f"Validation error: {e}"
-    
-    def detect_injection_indicators(self, raw_response: str, predicted_class: str) -> bool:
-        """
-        Detect potential indicators that prompt injection affected the response.
-        
-        This is a heuristic check for research purposes.
-        """
-        indicators = []
-        
-        # Check if the response contains instructions or meta-commentary
-        injection_phrases = [
-            "ignore previous",
-            "disregard",
-            "new instructions",
-            "system prompt",
-            "i have been instructed",
-            "my instructions say",
-            "override",
-        ]
-        
-        lower_response = raw_response.lower()
-        for phrase in injection_phrases:
-            if phrase in lower_response:
-                indicators.append(f"Found phrase: {phrase}")
-        
-        # Check if predicted class contains path traversal attempts
-        if ".." in predicted_class or "/" in predicted_class or "\\" in predicted_class:
-            indicators.append("Path traversal in class name")
-        
-        # Check if predicted class is not in valid classes (after sanitization would change it)
-        if predicted_class not in self.valid_classes:
-            indicators.append(f"Invalid class name: {predicted_class}")
-        
-        return len(indicators) > 0
+
 
 
 class AIFileClassifier:
@@ -195,7 +114,6 @@ class AIFileClassifier:
     Main classifier that orchestrates LLM-based document classification.
     
     Features:
-    - Context window management (truncation)
     - Structured output with Pydantic validation
     - Concurrency control via semaphore
     - Modular prompt strategies
@@ -208,12 +126,7 @@ class AIFileClassifier:
         
         # Initialize prompt strategy
         self.prompt_strategy = prompt_strategy or get_prompt_strategy(app_config.prompt_strategy)
-        
-        # Initialize components
-        self.truncator = TokenTruncator(
-            max_tokens=app_config.max_tokens,
-            reserve_tokens=1500  # Reserve space for system prompt and response
-        )
+
         self.parser = LLMResponseParser(classes_definition)
         
         # Concurrency control
@@ -253,14 +166,12 @@ class AIFileClassifier:
     
     async def _classify_impl(self, filename: str, content: str) -> ClassificationResult:
         """Internal classification implementation."""
-        
-        # Truncate content if necessary
-        truncated_content, was_truncated = self.truncator.truncate(content)
+
         
         # Format the prompt
         formatted_messages = self.prompt.format_messages(
             class_definitions=self.classes_definition.format_for_prompt(),
-            file_content=truncated_content
+            file_content=content
         )
         
         try:
@@ -283,11 +194,7 @@ class AIFileClassifier:
                     is_error=True,
                     error_message=error or "Unknown parse error",
                 )
-            
-            # Check for injection indicators
-            injection_detected = self.parser.detect_injection_indicators(
-                raw_response, parsed.predicted_class
-            )
+
             
             return ClassificationResult(
                 filename=filename,
@@ -297,11 +204,11 @@ class AIFileClassifier:
                 raw_llm_response=raw_response,
                 prompt_template_used=self.prompt_strategy.get_template_string(),
                 is_error=False,
-                injection_detected=injection_detected,
             )
             
         except Exception as e:
             # Handle any LLM or network errors
+            print("ERROR during classification:", e)
             return ClassificationResult(
                 filename=filename,
                 predicted_class=self.app_config.quarantine_folder,

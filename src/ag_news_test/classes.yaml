@@ -1,48 +1,34 @@
-# Example Classification Configuration
-# 
-# This file defines the categories for document classification.
-# Each class has a name and description that helps the LLM understand
-# what type of documents belong in each category.
-
 classes:
-  - name: Financial
+  - name: World
     description: >
-      Financial documents including invoices, receipts, bank statements,
-      tax documents, budgets, expense reports, and any documents related
-      to money, transactions, or financial planning.
+      International and domestic news articles covering politics, diplomacy,
+      conflicts, wars, elections, government policy, humanitarian crises,
+      natural disasters, social issues, cultural events, and any general
+      news stories about events and developments around the globe that
+      do not primarily fit into Sports, Business, or Science/Technology.
 
-  - name: Legal
+  - name: Sports
     description: >
-      Legal documents including contracts, agreements, terms of service,
-      privacy policies, NDAs, legal notices, court documents, and any
-      documents with legal implications or formal legal language.
+      Articles about athletic competitions, sporting events, leagues,
+      tournaments, player transfers, match results, scores, standings,
+      team news, coaching changes, athlete profiles, Olympics, World Cup,
+      and any coverage of professional or amateur sports across all disciplines
+      including football, basketball, baseball, soccer, tennis, golf, and others.
 
-  - name: Technical
+  - name: Business
     description: >
-      Technical documentation including software documentation, API references,
-      code comments, system specifications, architecture documents, README files,
-      and any documents related to technology or software development.
+      Articles about the economy, financial markets, stock exchanges,
+      corporate earnings, mergers and acquisitions, industry trends,
+      trade policy, employment data, central bank decisions, startups,
+      venture capital, real estate markets, commodities, currencies,
+      company news, executive leadership, and any content focused on
+      commerce, finance, or economic activity.
 
-  - name: Marketing
+  - name: Sci/Tech
     description: >
-      Marketing materials including advertisements, promotional content,
-      press releases, social media posts, brand guidelines, campaign briefs,
-      and any documents aimed at promoting products or services.
-
-  - name: HR
-    description: >
-      Human resources documents including resumes, job descriptions,
-      employee handbooks, performance reviews, onboarding materials,
-      company policies, and any documents related to personnel management.
-
-  - name: Research
-    description: >
-      Research documents including academic papers, research proposals,
-      literature reviews, experiment reports, data analysis documents,
-      and any documents related to scientific or academic research.
-
-  - name: Personal
-    description: >
-      Personal documents including personal letters, journals, notes,
-      personal correspondence, non-business communications, and any
-      documents of a personal nature not fitting other categories.
+      Articles about scientific discoveries, research breakthroughs,
+      technology products, software, hardware, internet services, gadgets,
+      space exploration, artificial intelligence, biotechnology, medical
+      research, environmental science, cybersecurity, telecommunications,
+      consumer electronics, and any coverage of developments in science,
+      engineering, or the technology industry.
