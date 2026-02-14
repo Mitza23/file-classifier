@@ -77,29 +77,34 @@ def _init_garak(config: InjectionTestConfig):
     return _config.transient.report_filename
 
 
-def _build_custom_probes(valid_classes: list[str], samples: dict[str, list[str]]) -> list:
-    """Instantiate all custom probes with real dataset samples."""
-    return [
-        DirectMisclassification(valid_classes, samples),
-        ContextOverrideMisclassification(valid_classes, samples),
-        FewShotMisclassification(valid_classes, samples),
-        PayloadSandwichMisclassification(valid_classes, samples),
-        SystemPromptExtraction(valid_classes, samples),
-        ConfidenceInflation(valid_classes, samples),
-        ConfidenceDeflation(valid_classes, samples),
-        JSONFormatHijack(valid_classes, samples),
-        ReasoningHijack(valid_classes, samples),
-    ]
-
-
-def _build_detectors(valid_classes: list[str]) -> list:
-    """Instantiate all detectors."""
-    return [
+def _build_probe_detector_pairs(
+    valid_classes: list[str], samples: dict[str, list[str]]
+) -> list[tuple[object, list]]:
+    """Build (probe, detectors) pairs matching each probe to its relevant detectors."""
+    misclass_detectors = [
         MisclassificationDetector(),
-        PromptLeakageDetector(),
-        ConfidenceManipulationDetector(),
-        OutputFormatDetector(),
         ClassValidityDetector(valid_classes),
+    ]
+    return [
+        # Misclassification probes -> misclassification + class validity detectors
+        (DirectMisclassification(valid_classes, samples), misclass_detectors),
+        (ContextOverrideMisclassification(valid_classes, samples), misclass_detectors),
+        (FewShotMisclassification(valid_classes, samples), misclass_detectors),
+        (PayloadSandwichMisclassification(valid_classes, samples), misclass_detectors),
+        # Prompt leakage probe -> prompt leakage detector
+        (SystemPromptExtraction(valid_classes, samples), [PromptLeakageDetector()]),
+        # Confidence manipulation probes -> confidence manipulation detector
+        (ConfidenceInflation(valid_classes, samples), [ConfidenceManipulationDetector()]),
+        (ConfidenceDeflation(valid_classes, samples), [ConfidenceManipulationDetector()]),
+        # Output hijack probes -> output format + class validity detectors
+        (JSONFormatHijack(valid_classes, samples), [
+            OutputFormatDetector(),
+            ClassValidityDetector(valid_classes),
+        ]),
+        (ReasoningHijack(valid_classes, samples), [
+            OutputFormatDetector(),
+            ClassValidityDetector(valid_classes),
+        ]),
     ]
 
 
@@ -147,10 +152,11 @@ def run(config: InjectionTestConfig):
             strategy_name=strategy,
         )
 
-        # Build probes
-        probes = []
+        # Build probe-detector pairs and run each with matched detectors
         if config.probe_set in ("custom", "all"):
-            probes.extend(_build_custom_probes(valid_classes, samples))
+            for probe, detectors in _build_probe_detector_pairs(valid_classes, samples):
+                harness.run(generator, [probe], detectors, evaluator)
+
         if config.probe_set in ("builtin", "all"):
             from garak import _plugins
             builtin_probe_names = [
@@ -158,19 +164,21 @@ def run(config: InjectionTestConfig):
                 "probes.promptinject.HijackKillHumansMini",
                 "probes.promptinject.HijackLongPromptMini",
             ]
+            # Builtin probes get all detectors since we don't know their intent
+            all_detectors = [
+                MisclassificationDetector(),
+                PromptLeakageDetector(),
+                ConfidenceManipulationDetector(),
+                OutputFormatDetector(),
+                ClassValidityDetector(valid_classes),
+            ]
             for name in builtin_probe_names:
                 try:
                     p = _plugins.load_plugin(name)
                     if p:
-                        probes.append(p)
+                        harness.run(generator, [p], all_detectors, evaluator)
                 except Exception as e:
                     logging.warning("Could not load builtin probe %s: %s", name, e)
-
-        # Build detectors
-        detectors = _build_detectors(valid_classes)
-
-        # Run harness
-        harness.run(generator, probes, detectors, evaluator)
 
     # End run
     from garak import command
