@@ -116,11 +116,16 @@ def run(config: InjectionTestConfig):
     valid_classes = classes_def.get_class_names()
 
     # Load dataset samples for probes
+    if not app_config.label_mapping:
+        raise ValueError(
+            "label_mapping must be set in app_config.yaml to map integer dataset labels to class names"
+        )
     print(f"Loading dataset samples from {config.dataset_name} ({config.dataset_split})...")
     samples = load_dataset_samples(
         dataset_name=config.dataset_name,
         split=config.dataset_split,
         samples_per_class=config.samples_per_class,
+        label_mapping=app_config.label_mapping,
     )
     print(f"Loaded samples per class: {{{', '.join(f'{k}: {len(v)}' for k, v in samples.items())}}}")
 

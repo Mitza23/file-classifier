@@ -21,3 +21,12 @@ prompt_strategy: "direct"
 # Output Settings
 quarantine_folder: "_Unclassified"          # Folder for failed classifications
 log_file: "classification_results.jsonl"    # Experiment log filename
+
+# Dataset Label Mapping
+# Maps integer labels from the HuggingFace dataset to class name strings.
+# Must match the class names defined in classes.yaml.
+label_mapping:
+  1: "World"
+  2: "Sports"
+  3: "Business"
+  4: "SciTech"

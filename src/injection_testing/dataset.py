@@ -7,14 +7,12 @@ them by class name, providing real article content for probe payloads.
 import random
 from collections import defaultdict
 
-AG_NEWS_LABEL_MAPPING = {1: "World", 2: "Sports", 3: "Business", 4: "SciTech"}
-
 
 def load_dataset_samples(
-    dataset_name: str = "sh0416/ag_news",
-    split: str = "test",
-    samples_per_class: int = 5,
-    label_mapping: dict[int, str] | None = None,
+    dataset_name: str,
+    split: str,
+    samples_per_class: int,
+    label_mapping: dict[int, str],
     seed: int = 42,
 ) -> dict[str, list[str]]:
     """Load dataset samples grouped by class name.
@@ -24,16 +22,12 @@ def load_dataset_samples(
         split: Dataset split to use.
         samples_per_class: Number of samples to return per class.
         label_mapping: Maps integer labels to class name strings.
-            Defaults to AG News mapping.
         seed: Random seed for reproducible sampling.
 
     Returns:
         Dict mapping class name -> list of article text strings.
     """
     from datasets import load_dataset
-
-    if label_mapping is None:
-        label_mapping = AG_NEWS_LABEL_MAPPING
 
     dataset = load_dataset(dataset_name, split=split)
 

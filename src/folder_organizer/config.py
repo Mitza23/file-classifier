@@ -99,6 +99,12 @@ class AppConfig(BaseModel):
     # Output settings
     quarantine_folder: str = Field(default="_Unclassified", description="Folder for unclassified files")
     log_file: str = Field(default="classification_results.jsonl", description="Experiment log file name")
+
+    # Dataset settings
+    label_mapping: dict[int, str] = Field(
+        default_factory=dict,
+        description="Maps integer dataset labels to class name strings (e.g. {1: 'World', 2: 'Sports'})",
+    )
     
     @classmethod
     def from_yaml(cls, path: Path) -> "AppConfig":

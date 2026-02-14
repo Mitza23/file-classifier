@@ -338,6 +338,11 @@ max_tokens: 4096
 temperature: 0.1
 ollama_base_url: "http://localhost:11434"
 quarantine_folder: "_Unclassified"
+label_mapping:
+  1: "World"
+  2: "Sports"
+  3: "Business"
+  4: "SciTech"
 ```
 
 ---
