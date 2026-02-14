@@ -13,6 +13,7 @@ from pathlib import Path
 from folder_organizer.config import ClassesDefinition, AppConfig
 
 from injection_testing.config import InjectionTestConfig
+from injection_testing.dataset import load_dataset_samples
 from injection_testing.generator import ClassifierGenerator
 from injection_testing.report import generate_report
 
@@ -76,18 +77,18 @@ def _init_garak(config: InjectionTestConfig):
     return _config.transient.report_filename
 
 
-def _build_custom_probes(valid_classes: list[str]) -> list:
-    """Instantiate all custom probes."""
+def _build_custom_probes(valid_classes: list[str], samples: dict[str, list[str]]) -> list:
+    """Instantiate all custom probes with real dataset samples."""
     return [
-        DirectMisclassification(valid_classes),
-        ContextOverrideMisclassification(valid_classes),
-        FewShotMisclassification(valid_classes),
-        PayloadSandwichMisclassification(valid_classes),
-        SystemPromptExtraction(valid_classes),
-        ConfidenceInflation(valid_classes),
-        ConfidenceDeflation(valid_classes),
-        JSONFormatHijack(valid_classes),
-        ReasoningHijack(valid_classes),
+        DirectMisclassification(valid_classes, samples),
+        ContextOverrideMisclassification(valid_classes, samples),
+        FewShotMisclassification(valid_classes, samples),
+        PayloadSandwichMisclassification(valid_classes, samples),
+        SystemPromptExtraction(valid_classes, samples),
+        ConfidenceInflation(valid_classes, samples),
+        ConfidenceDeflation(valid_classes, samples),
+        JSONFormatHijack(valid_classes, samples),
+        ReasoningHijack(valid_classes, samples),
     ]
 
 
@@ -108,6 +109,15 @@ def run(config: InjectionTestConfig):
     classes_def = ClassesDefinition.from_yaml(config.classes_yaml_path)
     app_config = AppConfig.from_yaml(config.app_config_yaml_path)
     valid_classes = classes_def.get_class_names()
+
+    # Load dataset samples for probes
+    print(f"Loading dataset samples from {config.dataset_name} ({config.dataset_split})...")
+    samples = load_dataset_samples(
+        dataset_name=config.dataset_name,
+        split=config.dataset_split,
+        samples_per_class=config.samples_per_class,
+    )
+    print(f"Loaded samples per class: {{{', '.join(f'{k}: {len(v)}' for k, v in samples.items())}}}")
 
     print(f"Loaded {len(valid_classes)} classes: {valid_classes}")
     print(f"Strategies to test: {config.strategies}")
@@ -140,7 +150,7 @@ def run(config: InjectionTestConfig):
         # Build probes
         probes = []
         if config.probe_set in ("custom", "all"):
-            probes.extend(_build_custom_probes(valid_classes))
+            probes.extend(_build_custom_probes(valid_classes, samples))
         if config.probe_set in ("builtin", "all"):
             from garak import _plugins
             builtin_probe_names = [
@@ -207,6 +217,21 @@ def main():
         default=Path("injection_results"),
         help="Output directory for results",
     )
+    parser.add_argument(
+        "--dataset", type=str,
+        default="sh0416/ag_news",
+        help="HuggingFace dataset name",
+    )
+    parser.add_argument(
+        "--dataset-split", type=str,
+        default="test",
+        help="Dataset split to use",
+    )
+    parser.add_argument(
+        "--samples-per-class", type=int,
+        default=5,
+        help="Number of sample articles per class for probes",
+    )
 
     args = parser.parse_args()
 
@@ -217,6 +242,9 @@ def main():
         probe_set=args.probe_set,
         generations_per_prompt=args.generations,
         output_dir=args.output_dir,
+        dataset_name=args.dataset,
+        dataset_split=args.dataset_split,
+        samples_per_class=args.samples_per_class,
     )
 
     run(test_config)

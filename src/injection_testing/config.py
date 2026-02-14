@@ -15,3 +15,6 @@ class InjectionTestConfig:
     probe_set: str = "custom"  # "custom" | "builtin" | "all"
     generations_per_prompt: int = 1
     output_dir: Path = Path("injection_results")
+    dataset_name: str = "sh0416/ag_news"
+    dataset_split: str = "test"
+    samples_per_class: int = 5

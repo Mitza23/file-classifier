@@ -5,7 +5,6 @@ Handles LLM-based document classification with context management,
 structured output parsing, and concurrency control.
 """
 
-import asyncio
 import json
 import re
 from dataclasses import dataclass, field
@@ -128,9 +127,7 @@ class AIFileClassifier:
         self.prompt_strategy = prompt_strategy or get_prompt_strategy(app_config.prompt_strategy)
 
         self.parser = LLMResponseParser(classes_definition)
-        
-        # Concurrency control
-        self._semaphore: Optional[asyncio.Semaphore] = None
+
         
         # Initialize LLM
         self.llm = ChatOllama(
@@ -143,28 +140,8 @@ class AIFileClassifier:
         class_definitions = classes_definition.format_for_prompt()
         self.prompt = self.prompt_strategy.create_prompt(class_definitions)
     
-    @property
-    def semaphore(self) -> asyncio.Semaphore:
-        """Lazy initialization of semaphore for async context."""
-        if self._semaphore is None:
-            self._semaphore = asyncio.Semaphore(self.app_config.max_concurrent_requests)
-        return self._semaphore
-    
-    async def classify(self, filename: str, content: str) -> ClassificationResult:
-        """
-        Classify a single file's content.
-        
-        Args:
-            filename: Name of the file being classified
-            content: Text content of the file
-            
-        Returns:
-            ClassificationResult with all relevant data for logging
-        """
-        async with self.semaphore:
-            return await self._classify_impl(filename, content)
-    
-    async def _classify_impl(self, filename: str, content: str) -> ClassificationResult:
+
+    def _classify_impl(self, filename: str, content: str) -> ClassificationResult:
         """Internal classification implementation."""
 
         
@@ -175,8 +152,8 @@ class AIFileClassifier:
         )
         
         try:
-            # Call the LLM4.5.0
-            response = await self.llm.ainvoke(formatted_messages)
+            # Call the LLM
+            response = self.llm.invoke(formatted_messages)
             raw_response = response.content if hasattr(response, 'content') else str(response)
             
             # Parse the response
@@ -222,4 +199,4 @@ class AIFileClassifier:
     
     def classify_sync(self, filename: str, content: str) -> ClassificationResult:
         """Synchronous wrapper for classification."""
-        return asyncio.run(self.classify(filename, content))
+        return self._classify_impl(filename, content)
