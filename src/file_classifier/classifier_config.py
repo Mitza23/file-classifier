@@ -78,16 +78,13 @@ class ClassesDefinition(BaseModel):
         return "\n".join(lines)
 
 
-class AppConfig(BaseModel):
+class ClassifierConfig(BaseModel):
     """Application-level configuration."""
     
     # LLM settings
     model_name: str = Field(default="llama3.1:8b", description="Ollama model name")
-    max_tokens: int = Field(default=4096, description="Maximum context window tokens")
     temperature: float = Field(default=0.1, description="LLM temperature for classification")
-    
-    # Concurrency settings
-    max_concurrent_requests: int = Field(default=3, description="Maximum concurrent Ollama requests")
+
     
     # Prompt strategy
     prompt_strategy: str = Field(default="direct", description="Prompt strategy: 'direct' or 'cot'")
@@ -97,17 +94,14 @@ class AppConfig(BaseModel):
     ollama_base_url: str = Field(default="http://localhost:11434", description="Ollama API base URL")
     
     # Output settings
-    quarantine_folder: str = Field(default="_Unclassified", description="Folder for unclassified files")
+    fallback_class: str = Field(default="_Unclassified", description="Folder for unclassified files")
     log_file: str = Field(default="classification_results.jsonl", description="Experiment log file name")
 
-    # Dataset settings
-    label_mapping: dict[int, str] = Field(
-        default_factory=dict,
-        description="Maps integer dataset labels to class name strings (e.g. {1: 'World', 2: 'Sports'})",
-    )
-    
+    # Class definitions
+    classes_definitions: ClassesDefinition = Field(..., description="Definitions of classification categories")
+
     @classmethod
-    def from_yaml(cls, path: Path) -> "AppConfig":
+    def from_yaml(cls, path: Path) -> "ClassifierConfig":
         """Load app configuration from YAML."""
         with open(path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)

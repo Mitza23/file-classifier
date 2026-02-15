@@ -7,15 +7,14 @@ structured output parsing, and concurrency control.
 
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Optional
 
 from langchain_ollama import ChatOllama
-from langchain_core.messages import BaseMessage
 from pydantic import ValidationError
 
-from .config import ClassesDefinition, AppConfig, create_classification_response_model
-from .prompts import PromptStrategy, get_prompt_strategy
+from file_classifier.classifier_config import ClassesDefinition, ClassifierConfig, create_classification_response_model
+from file_classifier.prompts import get_prompt_strategy
 
 
 @dataclass
@@ -118,26 +117,25 @@ class AIFileClassifier:
     - Modular prompt strategies
     """
     
-    def __init__(self, classes_definition: ClassesDefinition, app_config: AppConfig,
-                 prompt_strategy: Optional[PromptStrategy] = None):
-        self.classes_definition = classes_definition
-        self.app_config = app_config
+    def __init__(self, classifier_config: ClassifierConfig):
+        self.classifier_config = classifier_config
         
         # Initialize prompt strategy
-        self.prompt_strategy = prompt_strategy or get_prompt_strategy(app_config.prompt_strategy)
+        self.prompt_strategy = get_prompt_strategy(classifier_config.prompt_strategy)
 
-        self.parser = LLMResponseParser(classes_definition)
+        self.parser = LLMResponseParser(classifier_config.classes_definitions)
 
+        self.classes_definitions = classifier_config.classes_definitions
         
         # Initialize LLM
         self.llm = ChatOllama(
-            model=app_config.model_name,
-            base_url=app_config.ollama_base_url,
-            temperature=app_config.temperature,
+            model=classifier_config.model_name,
+            base_url=classifier_config.ollama_base_url,
+            temperature=classifier_config.temperature,
         )
         
         # Create the prompt
-        class_definitions = classes_definition.format_for_prompt()
+        class_definitions = self.classes_definitions.format_for_prompt()
         self.prompt = self.prompt_strategy.create_prompt(class_definitions)
     
 
@@ -147,7 +145,7 @@ class AIFileClassifier:
         
         # Format the prompt
         formatted_messages = self.prompt.format_messages(
-            class_definitions=self.classes_definition.format_for_prompt(),
+            class_definitions=self.classes_definitions.format_for_prompt(),
             file_content=content
         )
         
@@ -163,7 +161,7 @@ class AIFileClassifier:
                 # Failed to parse - return error result
                 return ClassificationResult(
                     filename=filename,
-                    predicted_class=self.app_config.quarantine_folder,
+                    predicted_class=self.classifier_config.fallback_class,
                     confidence=0.0,
                     reasoning=f"Parse error: {error}",
                     raw_llm_response=raw_response,
@@ -188,7 +186,7 @@ class AIFileClassifier:
             print("ERROR during classification:", e)
             return ClassificationResult(
                 filename=filename,
-                predicted_class=self.app_config.quarantine_folder,
+                predicted_class=self.classifier_config.fallback_class,
                 confidence=0.0,
                 reasoning="",
                 raw_llm_response="",

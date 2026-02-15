@@ -12,9 +12,9 @@ from pathlib import Path
 
 from rich.console import Console
 
-from .config import ClassesDefinition, AppConfig
+from file_classifier.classifier_config import ClassesDefinition, ClassifierConfig
 from .organizer import FolderOrganizer
-from .prompts import list_available_strategies, get_prompt_strategy
+from file_classifier.prompts import list_available_strategies, get_prompt_strategy
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -55,10 +55,10 @@ Examples:
     
     # Optional arguments
     parser.add_argument(
-        "-a", "--app-config",
+        "-a", "--app-test_config",
         type=Path,
         default=None,
-        help="Path to application config YAML file",
+        help="Path to application test_config YAML file",
     )
     
     parser.add_argument(
@@ -137,27 +137,25 @@ def main() -> int:
             console.print(f"[red]Error: Input folder does not exist: {args.input_folder}[/red]")
             return 1
         
-        # Validate config file exists
+        # Validate test_config file exists
         if not args.classes_definition.exists():
             console.print(f"[red]Error: Classes definition file does not exist: {args.classes_definition}[/red]")
             return 1
         
-        # Load classification config
+        # Load classification test_config
         try:
             classes_definition = ClassesDefinition.from_yaml(args.classes_definition)
         except Exception as e:
-            console.print(f"[red]Error loading classification config: {e}[/red]")
+            console.print(f"[red]Error loading classification test_config: {e}[/red]")
             return 1
         
-        # Load or create app config
+        # Load or create app test_config
         if args.app_config and args.app_config.exists():
-            app_config = AppConfig.from_yaml(args.app_config)
+            app_config = ClassifierConfig.from_yaml(args.app_config)
         else:
-            app_config = AppConfig(
+            app_config = ClassifierConfig(
                 model_name=args.model,
                 ollama_base_url=args.ollama_url,
-                max_concurrent_requests=args.concurrency,
-                max_tokens=args.max_tokens,
                 prompt_strategy=args.strategy,
             )
         

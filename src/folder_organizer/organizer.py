@@ -8,17 +8,17 @@ to process documents and organize them into class folders.
 import asyncio
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 from rich.table import Table
 
-from .classifier import AIFileClassifier, ClassificationResult
-from .config import ClassesDefinition, AppConfig
+from file_classifier.classifier import AIFileClassifier, ClassificationResult
+from file_classifier.classifier_config import ClassesDefinition, ClassifierConfig
 from .file_ops import FileOperations
 from .logger import ExperimentLogger
-from .prompts import get_prompt_strategy, PromptStrategy
+from file_classifier.prompts import get_prompt_strategy, PromptStrategy
 
 
 @dataclass
@@ -49,7 +49,7 @@ class FolderOrganizer:
         self,
         input_folder: Path,
         classification_config: ClassesDefinition,
-        app_config: Optional[AppConfig] = None,
+        app_config: Optional[ClassifierConfig] = None,
         prompt_strategy: Optional[PromptStrategy] = None,
         experiment_id: Optional[str] = None,
     ):
@@ -60,12 +60,12 @@ class FolderOrganizer:
             input_folder: Path to the folder containing files to organize
             classification_config: Configuration with class definitions
             app_config: Application configuration (uses defaults if not provided)
-            prompt_strategy: Prompt strategy to use (uses config default if not provided)
+            prompt_strategy: Prompt strategy to use (uses test_config default if not provided)
             experiment_id: Optional ID for this experiment run
         """
         self.input_folder = Path(input_folder).resolve()
         self.classification_config = classification_config
-        self.app_config = app_config or AppConfig()
+        self.app_config = app_config or ClassifierConfig()
         
         # Initialize prompt strategy
         if prompt_strategy is None:
@@ -76,10 +76,10 @@ class FolderOrganizer:
         # Initialize components
         self.file_ops = FileOperations(
             self.input_folder,
-            quarantine_folder=self.app_config.quarantine_folder
+            quarantine_folder=self.app_config.fallback_class
         )
         
-        self.classifier = AIFileClassifier(classes_definition=classification_config, app_config=self.app_config,
+        self.classifier = AIFileClassifier(classes_definition=classification_config, classifier_config=self.app_config,
                                            prompt_strategy=self.prompt_strategy)
         
         self.logger = ExperimentLogger(
@@ -109,7 +109,7 @@ class FolderOrganizer:
             # File read error - create error result and quarantine
             result = ClassificationResult(
                 filename=filepath.name,
-                predicted_class=self.app_config.quarantine_folder,
+                predicted_class=self.app_config.fallback_class,
                 confidence=0.0,
                 reasoning="",
                 raw_llm_response="",
@@ -269,8 +269,8 @@ def organize_folder(
     
     Args:
         input_folder: Path to folder containing files
-        config_path: Path to classification config YAML
-        app_config_path: Optional path to app config YAML
+        config_path: Path to classification test_config YAML
+        app_config_path: Optional path to app test_config YAML
         prompt_strategy: Name of prompt strategy to use
         experiment_id: Optional experiment ID
         show_progress: Whether to show progress
@@ -282,9 +282,9 @@ def organize_folder(
     classification_config = ClassesDefinition.from_yaml(Path(config_path))
     
     if app_config_path:
-        app_config = AppConfig.from_yaml(Path(app_config_path))
+        app_config = ClassifierConfig.from_yaml(Path(app_config_path))
     else:
-        app_config = AppConfig(prompt_strategy=prompt_strategy)
+        app_config = ClassifierConfig(prompt_strategy=prompt_strategy)
     
     # Get prompt strategy
     strategy = get_prompt_strategy(prompt_strategy)

@@ -12,9 +12,10 @@ from garak import _config
 from garak.generators.base import Generator
 from garak.attempt import Message, Conversation
 
-from folder_organizer.classifier import AIFileClassifier
-from folder_organizer.config import ClassesDefinition, AppConfig
-from folder_organizer.prompts import get_prompt_strategy
+from file_classifier.classifier import AIFileClassifier
+from file_classifier.classifier_config import ClassesDefinition, ClassifierConfig
+from file_classifier.prompts import get_prompt_strategy
+from injection_testing.experiment_config import InjectionTestConfig
 
 
 class ClassifierGenerator(Generator):
@@ -26,25 +27,23 @@ class ClassifierGenerator(Generator):
 
     def __init__(
         self,
-        classes_definition: ClassesDefinition,
-        app_config: AppConfig,
+        classifier_config: ClassifierConfig,
         strategy_name: str,
         config_root=_config,
     ):
-        self.classes_definition = classes_definition
-        self.app_config = app_config
+        self.classifier_config = classifier_config
         self.strategy_name = strategy_name
-        self.valid_classes = classes_definition.get_class_names()
+        self.valid_classes = classifier_config.classes_definitions.get_class_names()
 
         # Build the classifier with the requested prompt strategy
         prompt_strategy = get_prompt_strategy(strategy_name)
+
+        self.classifier_config.prompt_strategy = strategy_name
         self.classifier = AIFileClassifier(
-            classes_definition=classes_definition,
-            app_config=app_config,
-            prompt_strategy=prompt_strategy,
+            classifier_config=classifier_config,
         )
 
-        self.name = f"{strategy_name}"
+        self.name = f"AIFileClassifier ({strategy_name})"
         super().__init__(name=self.name, config_root=config_root)
 
     def _call_model(

@@ -80,9 +80,7 @@ Class names are sanitized: only alphanumeric, spaces, hyphens, underscores allow
 
 ```python
 model_name: str = "llama3.1:8b"
-max_tokens: int = 4096
 temperature: float = 0.1
-max_concurrent_requests: int = 3
 prompt_strategy: str = "direct"       # "direct" | "cot" | "chain_of_thought" | "defensive"
 detect_injection: bool = False
 ollama_base_url: str = "http://localhost:11434"
@@ -307,7 +305,7 @@ Reads Garak's `.report.jsonl` file. Strategy inference: tracks `(probe, detector
 ```bash
 python -m injection_testing.runner \
   --classes ag_news_test/classes.yaml \
-  --config ag_news_test/app_config.yaml \
+  --test_config ag_news_test/classifier_config.yaml \
   --strategies direct cot defensive \
   --probe-set custom \
   --generations 1 \

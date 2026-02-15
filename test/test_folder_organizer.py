@@ -2,25 +2,21 @@
 Tests for the Folder Organizer application.
 """
 
-import json
 import pytest
-import tempfile
-from pathlib import Path
 
-from src.folder_organizer.config import (
+from file_classifier.classifier_config import (
     ClassDefinition,
     ClassesDefinition,
-    AppConfig,
     create_classification_response_model,
 )
 from src.folder_organizer.file_ops import FileOperations, SanitizedPath
-from src.folder_organizer.prompts import (
+from file_classifier.prompts import (
     get_prompt_strategy,
     list_available_strategies,
     DirectPromptStrategy,
     ChainOfThoughtPromptStrategy,
 )
-from src.folder_organizer.classifier import LLMResponseParser
+from file_classifier.classifier import LLMResponseParser
 
 
 class TestSanitizedPath:
@@ -85,7 +81,7 @@ class TestClassesDefinition:
 - name: Category2
   description: Second category
 """
-        config_file = tmp_path / "config.yaml"
+        config_file = tmp_path / "test_config.yaml"
         config_file.write_text(config_content)
         
         config = ClassesDefinition.from_yaml(config_file)
@@ -101,7 +97,7 @@ classes:
   - name: Category2
     description: Second category
 """
-        config_file = tmp_path / "config.yaml"
+        config_file = tmp_path / "test_config.yaml"
         config_file.write_text(config_content)
         
         config = ClassesDefinition.from_yaml(config_file)

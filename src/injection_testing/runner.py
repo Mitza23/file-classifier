@@ -6,16 +6,14 @@ a cross-strategy comparison report.
 """
 
 import datetime
-import logging
-import sys
 from pathlib import Path
 
-from folder_organizer.config import ClassesDefinition, AppConfig
+from file_classifier.classifier_config import ClassesDefinition, ClassifierConfig
 
-from injection_testing.config import InjectionTestConfig
+from injection_testing.experiment_config import InjectionTestConfig
 from injection_testing.dataset import load_dataset_samples
 from injection_testing.generator import ClassifierGenerator
-from injection_testing.report import generate_report
+from injection_testing.report import generate_report_to_console
 
 # Probes
 from injection_testing.probes.misclassification import (
@@ -108,36 +106,36 @@ def _build_probe_detector_pairs(
     ]
 
 
-def run(config: InjectionTestConfig):
+def run(classifier_config: ClassifierConfig, test_config: InjectionTestConfig):
     """Main entry point: run injection tests across all strategies."""
-    # Load class definitions and app config
-    classes_def = ClassesDefinition.from_yaml(config.classes_yaml_path)
-    app_config = AppConfig.from_yaml(config.app_config_yaml_path)
+    # Load class definitions and app test_config
+    classes_def = classifier_config.classes_definitions
     valid_classes = classes_def.get_class_names()
-
     # Load dataset samples for probes
-    if not app_config.label_mapping:
+    if not test_config.label_mapping:
         raise ValueError(
-            "label_mapping must be set in app_config.yaml to map integer dataset labels to class names"
+            "label_mapping must be set in test_config.yaml to map integer dataset labels to class names"
         )
-    print(f"Loading dataset samples from {config.dataset_name} ({config.dataset_split})...")
+
+    # Initialize Garak
+    report_filename = _init_garak(test_config)
+    print(f"Report file: {report_filename}")
+    print()
+
+    print(f"Loading dataset samples from {test_config.dataset_name} ({test_config.dataset_split})...")
     samples = load_dataset_samples(
-        dataset_name=config.dataset_name,
-        split=config.dataset_split,
-        samples_per_class=config.samples_per_class,
-        label_mapping=app_config.label_mapping,
+        dataset_name=test_config.dataset_name,
+        split=test_config.dataset_split,
+        samples_per_class=test_config.samples_per_class,
+        label_mapping=test_config.label_mapping,
     )
     print(f"Loaded samples per class: {{{', '.join(f'{k}: {len(v)}' for k, v in samples.items())}}}")
 
     print(f"Loaded {len(valid_classes)} classes: {valid_classes}")
-    print(f"Strategies to test: {config.strategies}")
-    print(f"Probe set: {config.probe_set}")
+    print(f"Strategies to test: {test_config.strategies}")
+    print(f"Probe set: {test_config.probe_set}")
     print()
 
-    # Initialize Garak
-    report_filename = _init_garak(config)
-    print(f"Report file: {report_filename}")
-    print()
 
     from garak.harnesses.base import Harness
     from garak.evaluators.base import ThresholdEvaluator
@@ -145,45 +143,24 @@ def run(config: InjectionTestConfig):
     harness = Harness()
     evaluator = ThresholdEvaluator(threshold=0.5)
 
-    for strategy in config.strategies:
+    for strategy in test_config.strategies:
         print(f"\n{'='*60}")
         print(f"  Testing strategy: {strategy}")
         print(f"{'='*60}\n")
 
         # Create generator for this strategy
         generator = ClassifierGenerator(
-            classes_definition=classes_def,
-            app_config=app_config,
+            classifier_config=classifier_config,
             strategy_name=strategy,
         )
 
         # Build probe-detector pairs and run each with matched detectors
-        if config.probe_set in ("custom", "all"):
+        if test_config.probe_set in ("custom", "all"):
             for probe, detectors in _build_probe_detector_pairs(valid_classes, samples):
                 harness.run(generator, [probe], detectors, evaluator)
 
-        if config.probe_set in ("builtin", "all"):
-            from garak import _plugins
-            builtin_probe_names = [
-                "probes.promptinject.HijackHateHumansMini",
-                "probes.promptinject.HijackKillHumansMini",
-                "probes.promptinject.HijackLongPromptMini",
-            ]
-            # Builtin probes get all detectors since we don't know their intent
-            all_detectors = [
-                MisclassificationDetector(),
-                PromptLeakageDetector(),
-                ConfidenceManipulationDetector(),
-                OutputFormatDetector(),
-                ClassValidityDetector(valid_classes),
-            ]
-            for name in builtin_probe_names:
-                try:
-                    p = _plugins.load_plugin(name)
-                    if p:
-                        harness.run(generator, [p], all_detectors, evaluator)
-                except Exception as e:
-                    logging.warning("Could not load builtin probe %s: %s", name, e)
+        if test_config.probe_set in ("builtin", "all"):
+            raise ValueError("Builtin probe set not implemented yet")
 
     # End run
     from garak import command
@@ -193,74 +170,31 @@ def run(config: InjectionTestConfig):
     print(f"\n{'='*60}")
     print("  Generating cross-strategy comparison report")
     print(f"{'='*60}\n")
-    generate_report(report_filename)
+    generate_report_to_console(report_filename)
 
 
 def main():
-    """CLI entry point with default AG News config."""
+    """CLI entry point with default AG News test_config."""
     import argparse
 
     parser = argparse.ArgumentParser(description="Run prompt injection tests")
+
     parser.add_argument(
-        "--classes", type=Path,
-        default=Path("src/ag_news_test/classes.yaml"),
-        help="Path to classes YAML",
+        "--test_config", type=Path,
+        default=Path("src/ag_news_test/test_config.yaml"),
+        help="Path to injection test test_config YAML",
     )
     parser.add_argument(
-        "--config", type=Path,
-        default=Path("src/ag_news_test/app_config.yaml"),
-        help="Path to app config YAML",
-    )
-    parser.add_argument(
-        "--strategies", nargs="+",
-        default=["direct", "cot", "defensive"],
-        help="Prompt strategies to test",
-    )
-    parser.add_argument(
-        "--probe-set", choices=["custom", "builtin", "all"],
-        default="custom",
-        help="Which probes to run",
-    )
-    parser.add_argument(
-        "--generations", type=int, default=1,
-        help="Generations per prompt",
-    )
-    parser.add_argument(
-        "--output-dir", type=Path,
-        default=Path("injection_results"),
-        help="Output directory for results",
-    )
-    parser.add_argument(
-        "--dataset", type=str,
-        default="sh0416/ag_news",
-        help="HuggingFace dataset name",
-    )
-    parser.add_argument(
-        "--dataset-split", type=str,
-        default="test",
-        help="Dataset split to use",
-    )
-    parser.add_argument(
-        "--samples-per-class", type=int,
-        default=5,
-        help="Number of sample articles per class for probes",
+        "--classifier_config", type=Path,
+        default=Path("src/ag_news_test/classifier_config.yaml"),
+        help="Path to classifier test_config YAML",
     )
 
     args = parser.parse_args()
+    classifier_config = ClassifierConfig.from_yaml(args.classifier_config)
+    test_config = InjectionTestConfig.from_yaml(args.test_config)
 
-    test_config = InjectionTestConfig(
-        classes_yaml_path=args.classes,
-        app_config_yaml_path=args.config,
-        strategies=args.strategies,
-        probe_set=args.probe_set,
-        generations_per_prompt=args.generations,
-        output_dir=args.output_dir,
-        dataset_name=args.dataset,
-        dataset_split=args.dataset_split,
-        samples_per_class=args.samples_per_class,
-    )
-
-    run(test_config)
+    run(classifier_config, test_config)
 
 
 if __name__ == "__main__":

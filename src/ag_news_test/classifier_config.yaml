@@ -1,0 +1,54 @@
+# Application Configuration
+#
+# This file contains settings for the Folder Organizer application.
+# Adjust these based on your local setup and research needs.
+
+# LLM Settings
+model_name: "llama3.1:8b"              # Ollama model name (e.g., llama3, mistral, mixtral)
+temperature: 0.1                  # Low temperature for consistent classification
+ollama_base_url: "http://localhost:11434"   # Ollama API endpoint
+
+# Prompt Strategy
+# Options: direct, cot (chain_of_thought), defensive
+prompt_strategy: "direct"
+
+# Output Settings
+fallback_class: "_Unclassified"          # Folder for failed classifications
+log_file: "classification_results.jsonl"    # Experiment log filename
+
+#Classes definitions
+classes_definitions:
+  classes:
+    - name: World
+      description: >
+        International and domestic news articles covering politics, diplomacy,
+        conflicts, wars, elections, government policy, humanitarian crises,
+        natural disasters, social issues, cultural events, and any general
+        news stories about events and developments around the globe that
+        do not primarily fit into Sports, Business, or Science/Technology.
+
+    - name: Sports
+      description: >
+        Articles about athletic competitions, sporting events, leagues,
+        tournaments, player transfers, match results, scores, standings,
+        team news, coaching changes, athlete profiles, Olympics, World Cup,
+        and any coverage of professional or amateur sports across all disciplines
+        including football, basketball, baseball, soccer, tennis, golf, and others.
+
+    - name: Business
+      description: >
+        Articles about the economy, financial markets, stock exchanges,
+        corporate earnings, mergers and acquisitions, industry trends,
+        trade policy, employment data, central bank decisions, startups,
+        venture capital, real estate markets, commodities, currencies,
+        company news, executive leadership, and any content focused on
+        commerce, finance, or economic activity.
+
+    - name: Sci/Tech
+      description: >
+        Articles about scientific discoveries, research breakthroughs,
+        technology products, software, hardware, internet services, gadgets,
+        space exploration, artificial intelligence, biotechnology, medical
+        research, environmental science, cybersecurity, telecommunications,
+        consumer electronics, and any coverage of developments in science,
+        engineering, or the technology industry.

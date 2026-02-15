@@ -13,7 +13,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
-from .classifier import ClassificationResult
+from file_classifier.classifier import ClassificationResult
 
 
 class ExperimentMetadata(BaseModel):
@@ -28,7 +28,7 @@ class ExperimentMetadata(BaseModel):
     successful_classifications: int = Field(default=0, description="Files successfully classified")
     failed_classifications: int = Field(default=0, description="Files that failed classification")
     injection_detections: int = Field(default=0, description="Potential injection attempts detected")
-    config_hash: Optional[str] = Field(default=None, description="Hash of classification config")
+    config_hash: Optional[str] = Field(default=None, description="Hash of classification test_config")
 
 
 class ExperimentLogger:

@@ -37,7 +37,7 @@ def _infer_strategy(probe_name: str, eval_entries: list[dict]) -> str:
     return probe_name
 
 
-def generate_report(report_path: str):
+def generate_report_to_console(report_path: str):
     """Generate and print a cross-strategy comparison table.
 
     The report groups results by (probe, detector) and shows ASR
