@@ -19,8 +19,8 @@ label_mapping:
 # Injection Testing Settings
 # Prompt strategies to test: direct, cot (chain_of_thought), defensive
 strategies:
-  - "direct"
-#  - "cot"
+#  - "direct"
+  - "cot"
 #  - "defensive"
 
 # Probe set: "custom" (9 custom probes), "builtin" (garak promptinject), "all"
@@ -30,4 +30,4 @@ probe_set: "custom"
 generations_per_prompt: 1
 
 # Output Settings
-output_dir: "injection_results"
+output_dir: "injection_results_cot"

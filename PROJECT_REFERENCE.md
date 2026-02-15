@@ -182,7 +182,7 @@ class InjectionTestConfig:
     strategies: list[str] = field(default_factory=lambda: ["direct", "cot", "defensive"])
     probe_set: str = "custom"              # "custom" | "builtin" | "all"
     generations_per_prompt: int = 1
-    output_dir: Path = Path("injection_results")
+    output_dir: Path = Path("injection_results_cot")
     dataset_name: str = "sh0416/ag_news"
     dataset_split: str = "test"
     samples_per_class: int = 5
@@ -309,7 +309,7 @@ python -m injection_testing.runner \
   --strategies direct cot defensive \
   --probe-set custom \
   --generations 1 \
-  --output-dir injection_results \
+  --output-dir injection_results_cot \
   --dataset sh0416/ag_news \
   --dataset-split test \
   --samples-per-class 5

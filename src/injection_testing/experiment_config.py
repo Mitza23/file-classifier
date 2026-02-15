@@ -36,7 +36,7 @@ class InjectionTestConfig(BaseModel):
     generations_per_prompt: int = Field(default=1, description="Number of LLM generations per prompt")
 
     # Output settings
-    output_dir: Path = Field(default=Path("injection_results"), description="Output directory for results")
+    output_dir: Path = Field(default=Path("injection_results_cot"), description="Output directory for results")
 
     @classmethod
     def from_yaml(cls, path: Path) -> "TestingConfig":
